@@ -1,10 +1,4 @@
-/* ************************************************************************************************
- *                                                                                                *
- * Please read the following tutorial before implementing tasks:                                   *
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer *
- * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object        *
- *                                                                                                *
- ************************************************************************************************ */
+
 
 /**
  * Returns the rectangle object with width and height parameters and getArea() method
@@ -19,8 +13,14 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  return {
+    width,
+    height,
+    getArea() {
+      return this.width * this.height;
+    },
+  };
 }
 
 /**
@@ -33,8 +33,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
@@ -48,8 +48,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const result = JSON.parse(json);
+  Object.setPrototypeOf(result, proto);
+  return result;
 }
 
 /**
@@ -107,32 +109,67 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  selector: '',
+  checkOrder(order) {
+    if (this.curOrder > order) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    if (this.curOrder === order && (order === 1 || order === 2 || order === 6)) throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+  },
+  element(value) {
+    this.checkOrder(1);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 1;
+    builder.selector = this.selector + value;
+    return builder;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.checkOrder(2);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 2;
+    builder.selector = `${this.selector}#${value}`;
+    return builder;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.checkOrder(3);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 3;
+    builder.selector = `${this.selector}.${value}`;
+    return builder;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.checkOrder(4);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 4;
+    builder.selector = `${this.selector}[${value}]`;
+    return builder;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.checkOrder(5);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 5;
+    builder.selector = `${this.selector}:${value}`;
+    return builder;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    this.checkOrder(6);
+    const builder = Object.create(cssSelectorBuilder);
+    builder.curOrder = 6;
+    builder.selector = `${this.selector}::${value}`;
+    return builder;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const builder = Object.create(cssSelectorBuilder);
+    builder.selector = `${selector1.selector} ${combinator} ${selector2.selector}`;
+    return builder;
+  },
+
+  stringify() {
+    return this.selector;
   },
 };
 
