@@ -18,8 +18,8 @@
  *    'Tue, 26 Jan 2016 13:48:02 GMT' => Date()
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
-function parseDataFromRfc2822(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromRfc2822(value) {
+  return new Date(value);
 }
 
 /**
@@ -33,8 +33,8 @@ function parseDataFromRfc2822(/* value */) {
  *    '2016-01-19T16:07:37+00:00'    => Date()
  *    '2016-01-19T08:07:37Z' => Date()
  */
-function parseDataFromIso8601(/* value */) {
-  throw new Error('Not implemented');
+function parseDataFromIso8601(value) {
+  return new Date(value);
 }
 
 /**
@@ -51,8 +51,8 @@ function parseDataFromIso8601(/* value */) {
  *    Date(2012,1,1)    => true
  *    Date(2015,1,1)    => false
  */
-function isLeapYear(/* date */) {
-  throw new Error('Not implemented');
+function isLeapYear(date) {
+  return new Date(date.getFullYear(), 1, 29).getMonth() === 1;
 }
 
 /**
@@ -70,8 +70,8 @@ function isLeapYear(/* date */) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,10,0,0,250)     => "00:00:00.250"
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
-function timeSpanToString(/* startDate, endDate */) {
-  throw new Error('Not implemented');
+function timeSpanToString(startDate, endDate) {
+  return new Date(endDate.getTime() - startDate.getTime()).toISOString().slice(11, -1);
 }
 
 /**
@@ -90,8 +90,42 @@ function timeSpanToString(/* startDate, endDate */) {
  *    Date.UTC(2016,3,5,18, 0) => Math.PI
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
-function angleBetweenClockHands(/* date */) {
-  throw new Error('Not implemented');
+function angleBetweenClockHands(date) {
+  let hour = date.getUTCHours();
+  if (hour > 12) {
+    hour -= 12;
+  }
+
+  let angle = Math.abs(hour * 60 - date.getUTCMinutes() * 11);
+  if (angle > 360) {
+    angle -= 360;
+  }
+  return (0.5 * angle * Math.PI) / 180;
+}
+
+function extractMonth(day, arr, daysOfYear) {
+  const info = {
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December',
+  };
+
+  for (let i = 0; i < 12; i += 1) {
+    if (day <= arr[i]) {
+      const month = i + 1;
+      date = daysOfYear[i] - (arr[i] - day);
+      return `${info[month]}, ${date}`;
+    }
+  }
 }
 
 /**
@@ -112,8 +146,15 @@ function angleBetweenClockHands(/* date */) {
  *    getDay(365, false) => "December, 31"
  *    getDay(366, true) => "December, 31"
  */
-function getDay(/* day, isLeap */) {
-  throw new Error('Not implemented');
+function getDay(day, isLeap) {
+  const daysOfYear = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const temp = [31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+  if (isLeap) {
+    daysOfYear[1] = 29;
+    const temp2 = [31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    return extractMonth(day, temp2, daysOfYear);
+  }
+  return extractMonth(day, temp, daysOfYear);
 }
 
 module.exports = {
